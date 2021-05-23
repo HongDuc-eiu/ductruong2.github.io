@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="format-detection" content="telephone=no, email=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" type="text/css" href="./common/css/style.css">
+    <link rel="stylesheet" type="text/css" href="./top/css/style.css">
+    <link rel="stylesheet" type="text/css" href="./top/css/style2.css">
+    <link rel="stylesheet" type="text/css" href="./top/css/footer.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.1/css/all.css">
+    </link>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Girassol|Indie+Flower|Oswald&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script scr="./top/js/script.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    (function($) {
+        $(function() {
+
+            var Carousel = {
+                body: $(".js-carousel"),
+                context: $(".js-carouselCtx"),
+                list: $(".js-carouselList"),
+                itemLength: $(".js-carouselList .Carousel-content-item").length,
+                isScrolling: false,
+                isNeedToBack: false,
+                currentX: 0,
+                currentItem: 1
+
+            }
+            var move = function(e) {
+                Carousel.currentX = e.pageX;
+                Carousel.startX = Carousel.currentX;
+                window.addEventListener("mousemove", carouselGrabbing);
+                window.addEventListener("mouseup", carouselStop);
+            }
+            var isGiftScrolling = false;
+
+            /************************window**********************/
+            setUpCasousel();
+
+            $(window).on("load resize", function() {
+                carouselSetUp();
+            });
+            /***************************************************/
+
+
+            function carouselGrabbing(e) {
+                var distanceX = e.pageX - Carousel.currentX;
+                Carousel.currentX = e.pageX;
+                Carousel.list.css({
+                    left: Carousel.list.position().left + distanceX
+                });
+                if (e.pageX - Carousel.startX >= 50) {
+                    Carousel.isNeedToBack = false;
+                    Carousel.currentItem--;
+                    scrollCarousel(Carousel.currentItem);
+                    window.removeEventListener("mousemove", carouselGrabbing);
+                    window.removeEventListener("mouseup", carouselStop);
+                } else if (Carousel.startX - e.pageX >= 50) {
+                    Carousel.isNeedToBack = false;
+                    Carousel.currentItem++;
+                    scrollCarousel(Carousel.currentItem);
+                    window.removeEventListener("mousemove", carouselGrabbing);
+                    window.removeEventListener("mouseup", carouselStop);
+                }
+            }
+
+            function carouselStop(e) {
+                window.removeEventListener("mousemove", carouselGrabbing);
+                window.removeEventListener("mouseup", carouselStop);
+                if (Carousel.isNeedToBack) {
+                    var carouselItem = $("#carousel" + Carousel.currentItem);
+                    Carousel.list.animate({
+                            left: 0 - carouselItem.position().left
+                        },
+                        400,
+                        function() {
+                            Carousel.isScrolling = false;
+                        }
+                    );
+                }
+            }
+
+            function scrollCarousel(index) {
+                Carousel.isScrolling = true;
+                Carousel.isNeedToBack = true;
+                var carouselItem = $("#carousel" + index);
+                if (carouselItem.length == 0) {
+                    isScrolling = false;
+                    return;
+                }
+                if (carouselItem.hasClass("Cloned")) {
+                    index = carouselItem.attr("data-index");
+                    var realItem = $("#carousel" + index);
+                    Carousel.currentItem = index;
+                }
+                $(".Carousel-nav-item--active").removeClass("Carousel-nav-item--active");
+                $(".js-carouselNavItem[data-index=" + index + "]").addClass("Carousel-nav-item--active");
+                Carousel.list.animate({
+                        "left": 0 - carouselItem.position().left
+                    }, 500,
+                    function() {
+                        if (carouselItem.hasClass("Cloned")) {
+                            Carousel.list.css("left", 0 - realItem.position().left);
+                        }
+                        Carousel.isScrolling = false;
+
+                    });
+            }
+
+            function setUpCasousel() {
+                var realFirstItem = Carousel.list.find(".Carousel-content-item").first();
+                var firstItem = realFirstItem.clone();
+                var firstItemIndex = Carousel.itemLength + 1;
+                firstItem.attr("id", "carousel" + firstItemIndex);
+                firstItem.addClass('Cloned');
+
+                var lastItem = Carousel.list.find(".Carousel-content-item").last().clone();
+                var lastItemIndex = 0;
+                lastItem.attr("id", "carousel" + lastItemIndex);
+                lastItem.addClass('Cloned');
+
+                Carousel.list.append(firstItem);
+                Carousel.list.prepend(lastItem);
+                Carousel.list.css("left", 0 - realFirstItem.position().left);
+            }
+            /** quy định cao cho carousel**/
+
+            function carouselSetUp() {
+                var mWidth = Carousel.body.width();
+                var mHeight = mWidth / 2.0769;
+                Carousel.context.height(mHeight);
+            }
+            /***************************************************/
+
+
+            $(".js-locationBtn").click(function() {
+                var mParent = $(this).parent();
+                mParent.toggleClass('Menu-brand-search-location--active')
+            });
+            /*đổi location*/
+            $(".js-locationOpt").click(function() {
+                var mLocation = $(this).find('span').text();
+                var location = $('.js-locationBtn')
+                location.text(mLocation);
+                location.parent().removeClass('Menu-brand-search-location--active');
+            });
+            /*hiện nav sp và không roll*/
+            $(".js-navHamburger").click(function() {
+                $('.js-nav').toggleClass('Nav--active')
+                if ($(".js-nav").hasClass("Nav--active")) {
+                    $("body").addClass("Noscroll");
+                } else {
+                    $("body").removeClass("Noscroll");
+                }
+            });
+            /*****************Carousel****************/
+
+
+
+            $(".js-carouselList img").on("mousedown", function(e) {
+                e.preventDefault();
+            });
+
+            Carousel.list.on("mousedown", move);
+
+            /*****Làm cho banner chạy ngang theo nút*****/
+            $(".js-carouselNavItem").click(function() {
+                if ($(this).hasClass("Carousel-nav-item--active")) {
+                    return;
+                }
+                var index = $(this).attr("data-index");
+                Carousel.currentItem = index;
+                scrollCarousel(Carousel.currentItem);
+            });
+
+            $(".js-carouselBtn").click(function() {
+                if (Carousel.isScrolling) {
+                    return;
+                }
+                if ($(this).hasClass("Carousel-content__btn--right")) {
+                    Carousel.isNeedToBack = false;
+                    Carousel.currentItem++;
+                    scrollCarousel(Carousel.currentItem);
+                    window.removeEventListener("mousemove", carouselGrabbing);
+                    window.removeEventListener("mouseup", carouselStop);
+                } else {
+                    Carousel.isNeedToBack = false;
+                    Carousel.currentItem--;
+                    scrollCarousel(Carousel.currentItem);
+                    window.removeEventListener("mousemove", carouselGrabbing);
+                    window.removeEventListener("mouseup", carouselStop);
+                }
+                if (Carousel.currentItem > Carousel.itemLength) {
+                    Carousel.currentItem = 1;
+                } else if (Carousel.currentItem < 1) {
+                    Carousel.currentItem = Carousel.itemLength;
+                }
+                scrollCarousel(Carousel.currentItem);
+
+            });
+            /*****************Sold Out****************/
+
+            $(".js-productSoldoutBtn").click(function() {
+                if (isGiftScrolling) {
+                    return;
+                }
+                isGiftScrolling = true;
+                var parent = $(this).parent();
+                if (parent.hasClass("Product-content-item-soldout--active")) {
+                    parent.removeClass('Product-content-item-soldout--active');
+                    setTimeout(function() {
+                        parent.find(".Product-content-item-soldout-detail").hide();
+                        isGiftScrolling = false;
+                    }, 500);
+                } else {
+                    parent.find(".Product-content-item-soldout-detail").show();
+                    setTimeout(function() {
+                        parent.addClass("Product-content-item-soldout--active");
+                        isGiftScrolling = false;
+                    }, 20);
+                }
+            });
+
+            /*****************Cart****************/
+            $(".js-productCartBtn").click(function() {
+                var cartNum = $(".js-cartView").attr("data-count");
+                var soldOut = false;
+                cartNum++;
+                //them vao cookie hoac cap nhat len server user id
+                var parent = $(this).closest(".Product-content-item");
+                var productName = parent.find(".Product-content-item-detail__name").text();
+                if (parent.hasClass("Product-content-item-soldout")) {
+                    soldOut = true;
+                } else {
+                    soldOut = false;
+                }
+
+                $(".js-cartView").attr("data-count", cartNum++);
+                showNotificaton(productName, cartNum % 2 === 0);
+            });
+
+            setTimeout(function() {
+                $(".js-cart").removeClass("Cart--disable");
+
+            }, 1000);
+            /*****************Sold Out****************/
+            var Notification = {
+                body: $(".js-Noti"),
+                message: $(".js-NotiMess")
+            }
+            var myTimeout;
+
+            function showNotificaton(productName, isError) {
+                console.log(isError);
+                if (Notification.body.hasClass("Notification--active")) {
+                    clearTimeout(myTimeout);
+                    closeNotification(true, productName, isError);
+                    return;
+                }
+                Notification.body.attr("data-error", isError);
+                Notification.message.text("Thêm sản phẩm " + productName + " thành công");
+                Notification.body.addClass("Notification--active");
+                myTimeout = setTimeout(closeNotification, 4000);
+            }
+
+            function closeNotification(isReopen = false, newProductName = "", isError = 0) {
+                Notification.body.removeClass("Notification--active");
+                if (isReopen) {
+                    setTimeout(function() {
+                        showNotificaton(newProductName, isError);
+                    }, 500);
+                }
+            }
+
+        });
+    })(jQuery);
+    var countDownDate = new Date("July 30, 2020 15:37:25").getTime();
+    var countdownfunction = setInterval(function() {
+        var now = new Date().getTime();
+        var distance = countDownDate - now;
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        document.getElementById("ngay").innerHTML = days;
+        document.getElementById("gio").innerHTML = hours;
+        document.getElementById("phut").innerHTML = minutes;
+        document.getElementById("giay").innerHTML = seconds;
+        if (distance < 0) {
+            clearInterval(countdownfunction);
+            document.getElementById("demo").innerHTML = "EXPIRED";
+        }
+    }, 1000);
+    </script>
+</head>
+
+<body>
+    <!-- header -->
+    <header class="only-pc">
+        <div class="Responsive">
+            <div class="Menu">
+                <div class="Menu-brand">
+                    <div class="Menu-brand__logo">
+                        <img src="./common/imgs/logo.webp" alt="">
+                    </div>
+                    <div class="Menu-brand-search">
+                        <div class="Menu-brand-search-location">
+                            <p class="js-locationBtn Menu-brand-search-location__txt">Hồ Chí Minh</p>
+                            <div class="Menu-brand-search-location-select">
+                                <p class="js-locationOpt"><i class="fa fa-map-marker"></i><span> Hồ Chí Minh </span></p>
+                                <p class="js-locationOpt"><i class="fa fa-map-marker"></i><span> Hà Nội </span></p>
+                            </div>
+                        </div>
+                        <div class="Menu-brand-search-input">
+                            <input type="text" placeholder="Tìm kiếm">
+                        </div>
+                        <div class="Menu-brand-search-button">
+                            <i class="fa fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="Menu-list">
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fas fa-tshirt"></i></div>
+                            <p class="Menu-list-item-content__txt">TOPS</p>
+                        </div>
+                        <div class="Menu-list-item-sub">
+                            <div class="Menu-list-item-sub-list">
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> T-shirts </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Shirts </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Tanks </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fas fa-bold"></i></i></div>
+                            <p class="Menu-list-item-content__txt">BOTTOMS</p>
+                        </div>
+                        <div class="Menu-list-item-sub">
+                            <div class="Menu-list-item-sub-list">
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Shorts </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Pants </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Joggers </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fab fa-dyalog"></i></div>
+                            <p class="Menu-list-item-content__txt">DENIMS</p>
+                        </div>
+                        <div class="Menu-list-item-sub">
+                            <div class="Menu-list-item-sub-list">
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Denim Jackets </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Denim Pants</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fab fa-opera"></i></div>
+                            <p class="Menu-list-item-content__txt">OUTERWEARS</p>
+                        </div>
+                        <div class="Menu-list-item-sub">
+                            <div class="Menu-list-item-sub-list">
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Jackets </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Bombers </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Hoodies </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Blazers </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Trench Coats</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fas fa-ring"></i></div>
+                            <p class="Menu-list-item-content__txt">ACCESSORIES</p>
+                        </div>
+                        <div class="Menu-list-item-sub">
+                            <div class="Menu-list-item-sub-list">
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Belts </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Handbags </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Hats </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Jewelrys </a>
+                                </div>
+                                <div class="Menu-list-item-sub-item">
+                                    <a href="#" class="Menu-list-item-sub-item__txt"> Others</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fas fa-share-alt"></i></div>
+                            <a href="#" class="Menu-list-item-content__txt">SOCIAL</a>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="far fa-address-card"></i></div>
+                            <a href="#" class="Menu-list-item-content__txt">CONTACT</a>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fas fa-feather-alt"></i></div>
+                            <a href="#" class="Menu-list-item-content__txt">TERMS</a>
+                        </div>
+                    </div>
+                    <div class="Menu-list-item">
+                        <div class="Menu-list-item-content">
+                            <div class="Menu-list-item-content__icon"><i class="fa fa-gift"></i></div>
+                            <a href="#" class="Menu-list-item-content__txt">PROMOTION</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <header class="only-sp">
+        <div class="js-nav Nav">
+            <div class="Nav-content">
+                <div class="Nav__logo">
+                    <img src="./common/imgs/logo.webp" alt="Dream Until Cry">
+                </div>
+                <div class="Nav-search">
+                    <div class="Nav-search-content">
+                        <div class="Nav-search__input">
+                            <input type="text" placeholder="Tìm kiếm">
+                        </div>
+                        <div class="Nav-search__btn"><i class="fa fa-search"></i></div>
+                    </div>
+                </div>
+                <div class="Nav-hamburger">
+                    <div class="js-navHamburger Nav-hamburger-content">
+                        <span class="Nav-hamburger-content__ico"></span>
+                        <span class="Nav-hamburger-content__ico"></span>
+                        <span class="Nav-hamburger-content__ico"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="Nav-menu">
+                <div class="Nav-menu-content">
+                    <div class="Nav-menu-content-list">
+                        <p class="Nav-menu-content-item">TOPS</p>
+                        <p class="Nav-menu-content-item">BOTTOMS</p>
+                        <p class="Nav-menu-content-item">DENIMS</p>
+                        <p class="Nav-menu-content-item">OUTERWEARS</p>
+                        <p class="Nav-menu-content-item">ACCESSORIES</p>
+                        <p class="Nav-menu-content-item">SOCIAL</p>
+                        <p class="Nav-menu-content-item">CONTACT</p>
+                        <p class="Nav-menu-content-item">TERMS</p>
+                        <p class="Nav-menu-content-item">PROMOTION</p>
+                    </div>
+                    <div class="Nav-menu-content-footer">
+                        <div class="Nav-menu-content-footer-contact">
+                            <a href="tel:0869803404">0869803404</a>
+                        </div>
+                        <p style="font-style:italic;text-align: center;">Đây là web của Hồng Đức! Nếu có liên hệ hãy gọi số bên trên</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- banner -->
+    <div class="Responsive">
+        <div class="Banner">
+            <div class="js-carousel Carousel">
+                <div class="js-carouselCtx Carousel-content">
+                    <div class="js-carouselList Carousel-content-list">
+                        <div class="Carousel-content-item" id="carousel1" data-index="1">
+                            <img src="./top/img/DUCbanner.webp" alt="">
+                            <div class="cycle-caption">
+                                <h3>
+                                    <a href="#" target="_self">Brand</a>
+                                </h3>
+                                <p> Đây là thương hiệu</p>
+                            </div>
+                        </div>
+                        <div class="Carousel-content-item" id="carousel2" data-index="2">
+                            <img src="./top/img/Mean.webp" alt="">
+                            <div class="cycle-caption">
+                                <h3>
+                                    <a href="#" target="_self">Message conveyed</a>
+                                </h3>
+                                <p> Đây là thông điệp thương hiệu</p>
+                            </div>
+                        </div>
+                        <div class="Carousel-content-item" id="carousel3" data-index="3">
+                            <img src="./top/img/Contact.webp" alt="">
+                            <div class="cycle-caption">
+                                <h3>
+                                    <a href="#" target="_self">Brand</a>
+                                </h3>
+                                <p> Đây là thông tin người sáng lập</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="js-carouselBtn Carousel-content__btn"></div>
+                    <div class="js-carouselBtn Carousel-content__btn Carousel-content__btn--right"></div>
+                </div>
+                <div class="Carousel-nav">
+                    <div class="js-carouselNavItem Carousel-nav-item Carousel-nav-item--active" data-index="1">
+                        <p class="only-pc Carousel-nav-item__txt">Brand</p>
+                    </div>
+                    <div class="js-carouselNavItem Carousel-nav-item" data-index="2">
+                        <p class="only-pc Carousel-nav-item__txt">Message conveyed</p>
+                    </div>
+                    <div class="js-carouselNavItem Carousel-nav-item" data-index="3">
+                        <p class="only-pc Carousel-nav-item__txt">Contact Founder</p>
+                    </div>
+                </div>
+            </div>
+            <div class="Banner-area">
+                <a href="#" class="Banner-area__item">
+                    <img src="./top/img/banner_1.webp" alt="">
+                </a>
+                <a href="#" class="Banner-area__item">
+                    <img src="./top/img/banner_2.webp" alt="">
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- sale -->
+    <div class="Responsive">
+        <div class="bgimg">
+            <div class="container">
+                <div>
+                    <h1 class="text-center">Big Sale!</h1>
+                    <br />
+                </div>
+                <div class="container-list">
+                    <div class="container-list-item">
+                        <div class="item">
+                            <div class="number" id="ngay"></div>
+                            <div class="title">Ngày</div>
+                        </div>
+                    </div>
+                    <div class="container-list-item">
+                        <div class="item">
+                            <div class="number" id="gio"></div>
+                            <div class="title">Giờ</div>
+                        </div>
+                    </div>
+                    <div class="container-list-item">
+                        <div class="item">
+                            <div class="number" id="phut"></div>
+                            <div class="title">Phút</div>
+                        </div>
+                    </div>
+                    <div class="container-list-item">
+                        <div class="item">
+                            <div class="number" id="giay"></div>
+                            <div class="title">Giây</div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <p class="slogan">Cơ hội giảm giá bất ngờ đến từ cửa hàng! Xin cùng chờ đợi thời gian ấy.</p>
+                    <p class="sign"> Hồng Đức </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- product -->
+    <div class="Responsive">
+        <div class="Product">
+            <div class="Product-head">
+                <div class="Product-head__txt">
+                    <a href="#">Bán chạy</a>
+                </div>
+                <div class="Product-head-tag">
+                    <p>Tops</p>
+                    <p>Bottoms</p>
+                    <p>Denims</p>
+                    <p>Outerwears</p>
+                    <p>Accessories</p>
+                </div>
+            </div>
+            <div class="Product-content">
+                <div class="Product-content-list">
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_1-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">LONG – HOODIE</p>
+                            <p class="Product-content-item-detail__price">580.000 vnd<span>600.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-soldout">
+                            <div class="js-productSoldoutBtn Product-content-item-soldout__btn">
+                                <i class="far fa-times-circle"></i> Sold Out
+                            </div>
+                            <div class="Product-content-item-soldout-detail">
+                                <p class="Product-content-item-soldout-detail__ttl">Sản phẩm hết hàng:</p>
+                                <p class="Product-content-item-soldout-detail__txt">Thành thật xin lỗi vì sự bất tiện này. Hiện tại mặt hàng đã hết.</p>
+                            </div>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_2-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">ESSENTIAL JOGGER – BLACK</p>
+                            <p class="Product-content-item-detail__price">380.000 vnd<span>400.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_3-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">FADE BLUE DENIM</p>
+                            <p class="Product-content-item-detail__price">450.000 vnd <span> 480,000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_4-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">ELASTIC SHORT</p>
+                            <p class="Product-content-item-detail__price">280.000 vnd <span> 300,000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_5-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">VINTAGE CREW TEE</p>
+                            <p class="Product-content-item-detail__price">350.000 vnd <span> 380.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_6-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">RAW EDGE FLANNEL SHIRT</p>
+                            <p class="Product-content-item-detail__price">1.400.000 vnd <span> 1.580.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_7-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">BASIC SHOULDER BAG</p>
+                            <p class="Product-content-item-detail__price">365.000 vnd <span> 380.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_8-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">SNAP CARGO PANTS</p>
+                            <p class="Product-content-item-detail__price">600.000 vnd <span> 580.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_9-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">VINTAGE WASH TANK</p>
+                            <p class="Product-content-item-detail__price">150.000 vnd <span> 200.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_10-2.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">ATHLETIC CAP</p>
+                            <p class="Product-content-item-detail__price">600.000 vnd <span> 580.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="Product">
+            <div class="Product-head">
+                <div class="Product-head__txt">
+                    <a href="#">Mới nhất</a>
+                </div>
+                <div class="Product-head-tag">
+                    <p>January</p>
+                    <p>February</p>
+                    <p>March</p>
+                    <p>April</p>
+                    <p>May</p>
+                    <p>June</p>
+                    <p>July</p>
+                    <p>August</p>
+                    <p>September</p>
+                    <p>October</p>
+                    <p>November</p>
+                    <p>December</p>
+                </div>
+            </div>
+            <div class="Product-content">
+                <div class="Product-content-list">
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_1-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">LONG – HOODIE</p>
+                            <p class="Product-content-item-detail__price">580.000 vnd<span>600.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-soldout">
+                            <div class="js-productSoldoutBtn Product-content-item-soldout__btn">
+                                <i class="far fa-times-circle"></i> Sold Out
+                            </div>
+                            <div class="Product-content-item-soldout-detail">
+                                <p class="Product-content-item-soldout-detail__ttl">Sản phẩm hết hàng:</p>
+                                <p class="Product-content-item-soldout-detail__txt">Thành thật xin lỗi vì sự bất tiện này. Hiện tại mặt hàng đã hết.</p>
+                            </div>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_2-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">ESSENTIAL JOGGER – BLACK</p>
+                            <p class="Product-content-item-detail__price">380.000 vnd<span>400.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_3-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">FADE BLUE DENIM</p>
+                            <p class="Product-content-item-detail__price">450.000 vnd <span> 480,000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_4-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">ELASTIC SHORT</p>
+                            <p class="Product-content-item-detail__price">280.000 vnd <span> 300,000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_5-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">VINTAGE CREW TEE</p>
+                            <p class="Product-content-item-detail__price">350.000 vnd <span> 380.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_6-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">RAW EDGE FLANNEL SHIRT</p>
+                            <p class="Product-content-item-detail__price">1.400.000 vnd <span> 1.580.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_7-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">BASIC SHOULDER BAG</p>
+                            <p class="Product-content-item-detail__price">365.000 vnd <span> 380.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_8-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">SNAP CARGO PANTS</p>
+                            <p class="Product-content-item-detail__price">600.000 vnd <span> 580.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_9-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">VINTAGE WASH TANK</p>
+                            <p class="Product-content-item-detail__price">150.000 vnd <span> 200.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Product-content-item">
+                        <div class="Product-content-item__img">
+                            <img src="./product/img/sp_10-1.webp" alt="">
+                        </div>
+                        <div class="Product-content-item-detail">
+                            <p class="Product-content-item-detail__name">ATHLETIC CAP</p>
+                            <p class="Product-content-item-detail__price">600.000 vnd <span> 580.000 vnd</span></p>
+                        </div>
+                        <div class="Product-content-item-cart">
+                            <div class="js-productCartBtn Product-content-item-cart__btn">
+                                <i class="far fa-plus-square"></i> Thêm
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="js-cart Cart Cart--disable">
+        <div class="js-cartView Cart__btn" data-count="0">
+            <i class="fas fa-cart-plus"></i>
+        </div>
+    </div>
+    <div class="js-Noti Notification" data-error="0">
+        <div class="Notification-content">
+            <div class="js-NotiMess Notification-content-mess"></div>
+        </div>
+    </div>
+    <!-- footer -->
+    <div class="Responsive">
+        <footer>
+            <div class="footer-top">
+                <div class="footer-list-top">
+                    <div class="footer-list-top-item">
+                        <h4 class="footer-list-top-item__txt">Mission</h4>
+                        <div class="tx-div"></div>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <p class="footer-list-top-item__txt">This is my own website. The meaning of the DUC brand is me and I also think of Dream Until Cry, like trying my best until sweat and tears have to fall!</p>
+                    </div>
+                </div>
+                <div class="footer-list-top small">
+                    <div class="footer-list-top-item">
+                        <h4 class="footer-list-top-item__txt">Quick links</h4>
+                        <div class="tx-div"></div>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <a href="#" class="footer-list-top-item__txt">Question and Answer</a>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <a href="#" class="footer-list-top-item__txt">Warranty and return</a>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <a href="#" class="footer-list-top-item__txt">Feedback</a>
+                    </div>
+                </div>
+                <div class="footer-list-top medium">
+                    <div class="footer-list-top-item">
+                        <h4 class="footer-list-top-item__txt">Office Hours</h4>
+                        <div class="tx-div"></div>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <p class="footer-list-top-item__txt">Monday - Friday: 7.00 AM - 10.00 PM</p>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <p class="footer-list-top-item__txt">Saturday: 8.00 AM - 10.00 PM</p>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <p class="footer-list-top-item__txt">Sunday: Close store</p>
+                    </div>
+                </div>
+                <div class="footer-list-top">
+                    <div class="footer-list-top-item">
+                        <h4 class="footer-list-top-item__txt">Others</h4>
+                        <div class="tx-div"></div>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <a href="#" class="footer-list-top-item__txt">Someting for Fun</a>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <a href="#" class="footer-list-top-item__txt">Click it if you wanna</a>
+                    </div>
+                    <div class="footer-list-top-item">
+                        <a href="#" class="footer-list-top-item__txt">Thank's for your support</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-social-section">
+                <div class="footer-social-overlap footer-social-connect">
+                    <div class="tx-div-full"></div>
+                    <p>CONNECT</p>
+                    <span class="footer-social-small">with</span>
+                    <p>ME</p>
+                    <div class="tx-div-full"></div>
+                </div>
+                <div class="footer-social-overlap footer-social-icons-wrapper">
+                    <div class="tx-div-full"></div>
+                    <a href="https://www.facebook.com/" target="_blank"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                    <a href="https://mail.google.com/mail/u/0/#inbox" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                    <a href="https://www.instagram.com/" target="_blank"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                    <a href="https://www.youtube.com/" target="_blank"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+                    <a href="tel:0869803404"><i class="fa fa-phone-square" aria-hidden="true"></i></a>
+                    <div class="tx-div-full"></div>
+                </div>
+            </div>
+            <div class="tx-div-full"></div>
+            <div class="footer-social-section">
+                <div class="footer-bottom-wrapper">
+                    <p> © 2020 Copyright: Hồng Đức </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
